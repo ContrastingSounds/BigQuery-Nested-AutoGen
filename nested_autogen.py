@@ -202,8 +202,9 @@ for table in tables:
         sql= sql
     )
     query = sdk.create_sql_query(body)
-    response = sdk.run_sql_query(query.slug, 'json') # type: ignore
-    table_definition = json.loads(response)
-    
-    sql_table_name = f'{project}.{dataset}.{table[0]}'
-    generate_explore_from_data(table.name, sql_table_name, table_definition, partition=table.partition_column)
+    if query.slug:
+        response = sdk.run_sql_query(query.slug, 'json') 
+        table_definition = json.loads(response)
+
+        sql_table_name = f'{project}.{dataset}.{table[0]}'
+        generate_explore_from_data(table.name, sql_table_name, table_definition, partition=table.partition_column)
