@@ -2,12 +2,13 @@ from collections import namedtuple
 import copy
 import datetime
 import json
+import os
 from pprint import pprint
 import re
 import shutil
 import textwrap
 
-from looker_sdk import client
+import looker_sdk
 import lookml
 
 from config import project, dataset, tables
@@ -187,7 +188,8 @@ if not os.path.exists(OUTPUT_DIR):
 if not os.path.exists(os.path.join(OUTPUT_DIR, 'lkml')):
     os.makedirs(os.path.join(OUTPUT_DIR, 'lkml'))
 
-sdk = client.setup()
+sdk = looker_sdk.init31()
+
 for table in tables:
     sql = f'''
     SELECT * 
@@ -195,15 +197,13 @@ for table in tables:
     WHERE table_name = "{table[0]}"
     '''
 
-    sql_query_body = {
-        "model_name": "jdsports",
-        "sql": sql
-    }
-
-    sql_query = sdk.create_sql_query(sql_query_body)
-    sql_response = sdk.run_sql_query(sql_query.slug, 'json')
-    table_definition = json.loads(sql_response)
+    body = looker_sdk.models.SqlQueryCreate(
+        model_name= 'jdsports',
+        sql= sql
+    )
+    query = sdk.create_sql_query(body)
+    response = sdk.run_sql_query(query.slug, 'json') # type: ignore
+    table_definition = json.loads(response)
     
     sql_table_name = f'{project}.{dataset}.{table[0]}'
-    
     generate_explore_from_data(table.name, sql_table_name, table_definition, partition=table.partition_column)

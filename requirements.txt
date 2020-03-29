@@ -1,2 +1,2 @@
-looker-sdk==0.1.3b7
+looker-sdk==0.1.3b8
 lookml==0.0.5
